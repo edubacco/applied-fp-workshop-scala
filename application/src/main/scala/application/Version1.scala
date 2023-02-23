@@ -1,5 +1,8 @@
 package application
 
+import application.Version1.Command.*
+import application.Version1.Orientation.*
+
 /*
     ## V1 - Focus on the center (pure domain logic)
 
@@ -12,29 +15,80 @@ package application
  */
 object Version1 {
 
-  // TODO 1: Those type alias are only placeholders,
-  //  use correct type definitions and feel free to add more...
-  type Rover = String
-  type Planet = String
-  type Command = String
+  case class Size(width: Int, height: Int)
 
-  // TODO 2: Execute all commands and accumulate final rover state
-  def executeAll(planet: Planet, rover: Rover, commands: List[Command]): Rover = ???
+  case class Planet(size: Size, obstacles: Set[Obstacle])
 
-  // TODO 3: Dispatch one command to a specific function
-  def execute(planet: Planet, rover: Rover, command: Command): Rover = ???
+  case class Obstacle(position: Position)
 
-  // TODO 4: Change rover orientation
-  def turnRight(rover: Rover): Rover = ???
+  enum Command {
+    case MoveBackward
+    case MoveForward
+    case TurnRight
+    case TurnLeft
+  }
 
-  // TODO 5: Change rover orientation
-  def turnLeft(rover: Rover): Rover = ???
+  enum Orientation {
+    case N
+    case S
+    case W
+    case E
+  }
+  case class Position(x: Int, y: Int)
 
-  // TODO 6: Change rover position
-  def moveForward(planet: Planet, rover: Rover): Rover = ???
+  case class Rover(position: Position, orientation: Orientation)
 
-  // TODO 7: Change rover position
-  def moveBackward(planet: Planet, rover: Rover): Rover = ???
+  def executeAll(planet: Planet, rover: Rover, commands: List[Command]): Rover =
+    commands.foldLeft(rover)((updatedRover, command) => execute(planet, updatedRover, command))
+
+  def execute(planet: Planet, rover: Rover, command: Command): Rover =
+    command match {
+      case MoveBackward => moveBackward(planet, rover)
+      case MoveForward  => moveForward(planet, rover)
+      case TurnRight    => turnRight(rover)
+      case TurnLeft     => turnLeft(rover)
+    }
+
+  def turnRight(rover: Rover): Rover =
+    rover.copy(orientation = rover.orientation match {
+      case N => E
+      case S => W
+      case W => N
+      case E => S
+    })
+
+  def turnLeft(rover: Rover): Rover =
+    rover.copy(orientation = rover.orientation match {
+      case N => W
+      case S => E
+      case W => S
+      case E => N
+    })
+
+  def moveForward(planet: Planet, rover: Rover): Rover = {
+    val move = rover.orientation match {
+      case N => (0, 1)
+      case S => (0, -1)
+      case W => (-1, 0)
+      case E => (1, 0)
+    }
+
+    val newPosition = move match {
+      case (x, 0) => (wrap(rover.position.x, planet.size.width, x), rover.position.y)
+      case (0, y) => (rover.position.x, wrap(rover.position.y, planet.size.height, y))
+      case _      => (0, 0)
+    }
+    rover.copy(position = Position(newPosition._1, newPosition._2))
+  }
+
+  def moveBackward(planet: Planet, rover: Rover): Rover = invertOrientation(moveForward(planet, invertOrientation(rover)))
+
+  def invertOrientation(rover: Rover): Rover = rover.copy(orientation = rover.orientation match {
+    case N => S
+    case S => N
+    case W => E
+    case E => W
+  })
 
   // NOTE: utility function to get the pacman effect
   def wrap(value: Int, limit: Int, delta: Int): Int =
