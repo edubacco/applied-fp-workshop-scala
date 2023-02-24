@@ -86,7 +86,8 @@ class AdtDemo extends munit.FunSuite {
   /*
    * PROGRAM AS VALUES
    */
-
+  
+  val z = 1 + 2
   // We can model behavior intent with data types.
   // Then, data can be stored, combined and finally interpreted.
   // Whit different interpreters we can execute different behaviors.
@@ -111,6 +112,8 @@ class AdtDemo extends munit.FunSuite {
   def times(x: Expr, y: Expr): Expr =
     Times(x, y)
 
+  val Z = plus(num(1), num(2))
+  
   // In the end some other function execute the desired behavior
   def evalNormal(e: Expr): Int =
     e match {

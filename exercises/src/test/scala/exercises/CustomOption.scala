@@ -1,27 +1,33 @@
 package exercises
 
-// TODO: Remove IgnoreSuite annotation
-
-@munit.IgnoreSuite
 class CustomOption extends munit.FunSuite {
 
   enum Option[A] {
     case Yes[A](value: A) extends Option[A]
     case Nope[A]() extends Option[A]
 
-    // TODO: Implement the map function
-    def map[B](f: A => B): Option[B] = ???
+    //Implement the map function
+    def map[B](f: A => B): Option[B] = this match {
+      case Nope() => Nope()
+      case Yes(x) => Yes(f(x))
+    }
 
-    // TODO: Implement the flatMap function
-    def flatMap[B](f: A => Option[B]): Option[B] = ???
+    // Implement the flatMap function
+    def flatMap[B](f: A => Option[B]): Option[B] = this match {
+      case Nope() => Nope()
+      case Yes(x) => f(x)
+    }
 
-    // TODO: Implement the fold function
-    def fold[B](default: => B, to: A => B): B = ???
+    // Implement the fold function
+    def fold[B](default: => B, to: A => B): B = this match {
+      case Nope() => default
+      case Yes(x) => to(x)
+    }
   }
 
   object Option {
-    // TODO: Implement the pure function
-    def pure[A](a: A): Option[A] = ???
+    // Implement the pure function
+    def pure[A](a: A): Option[A] = Yes(a)
   }
 
   def increment(x: Int): Int =

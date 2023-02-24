@@ -1,8 +1,5 @@
 package exercises
 
-// TODO: Remove IgnoreSuite annotation
-
-@munit.IgnoreSuite
 class CombinationPhaseEffectful extends munit.FunSuite {
 
   case class Item(qty: Int)
@@ -24,28 +21,28 @@ class CombinationPhaseEffectful extends munit.FunSuite {
   test("creation and checkOut") {
     val item = createItem("100")
     // TODO: Use flatMap to checkOut 10 items
-    val result: Option[Item] = ???
+    val result: Option[Item] = item.flatMap(checkOut(10, _))
     assertEquals(result, Some(Item(90)))
   }
 
   test("creation, checkIn and checkOut") {
     val item = createItem("100")
     // TODO: Use map to checkIn 10 and then flatMap to checkOut 20 items
-    val result: Option[Item] = ???
+    val result: Option[Item] = item.map(checkIn(10, _)).flatMap(checkOut(20, _))
     assertEquals(result, Some(Item(90)))
   }
 
   test("invalid checkOut") {
     val item = createItem("100")
     // TODO: Use flatMap to checkOut 110 items
-    val result: Option[Item] = ???
+    val result: Option[Item] = item.flatMap(checkOut(110, _))
     assertEquals(result, None)
   }
 
   test("invalid creation") {
     val item = createItem("asd")
     // TODO: Use flatMap to checkOut 10 items
-    val result: Option[Item] = ???
+    val result: Option[Item] = item.flatMap(checkOut(10, _))
     assertEquals(result, None)
   }
 

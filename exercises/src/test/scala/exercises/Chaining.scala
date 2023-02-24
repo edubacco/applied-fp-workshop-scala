@@ -1,8 +1,5 @@
 package exercises
 
-// TODO: Remove IgnoreSuite annotation
-
-@munit.IgnoreSuite
 class Chaining extends munit.FunSuite {
 
   case class ItemId(value: Int)
@@ -12,7 +9,7 @@ class Chaining extends munit.FunSuite {
 
   def checkIn(qty: Int, item: Item): Item = item.copy(qty = item.qty + qty)
 
-  // TODO: For each test implement the follow program
+  // For each test implement the follow program
   // load an item
   // checkIn 10
   // save item
@@ -23,7 +20,10 @@ class Chaining extends munit.FunSuite {
     def load(id: ItemId): Try[Item] = Try(Item(id, 100))
     def save(item: Item): Try[Item] = Try(item)
 
-    val program: Try[Item] = ???
+    val program: Try[Item] =
+      load(id)
+        .map(checkIn(10, _))
+        .flatMap(save)
   }
 
   test("chaining w/ Either Monad") {
@@ -31,7 +31,10 @@ class Chaining extends munit.FunSuite {
     def load(id: ItemId): Either[String, Item] = Right(Item(id, 100))
     def save(item: Item): Either[String, Item] = Right(item)
 
-    val program: Either[String, Item] = ???
+    val program: Either[String, Item] =
+      load(id)
+        .map(checkIn(10, _))
+        .flatMap(save)
   }
 
   test("chaining with IO Monad") {
@@ -40,7 +43,10 @@ class Chaining extends munit.FunSuite {
     def load(id: ItemId): IO[Item] = IO(Item(id, 100))
     def save(item: Item): IO[Item] = IO(item)
 
-    val program: IO[Item] = ???
+    val program: IO[Item] =
+      load(id)
+        .map(checkIn(10, _))
+        .flatMap(save)
   }
 
 }
