@@ -23,11 +23,19 @@ object Version4 {
   import cats.syntax.applicativeError._
   import cats.effect.IO
 
-  // TODO 7:
   //  - combine loadPlanet, loadRover, loadCommands
   //  - call runMission
   //  - w/ writeError log any unhandled error in IO
-  def createApplication(planetFile: String, roverFile: String): IO[Unit] = ???
+  def createApplication(planetFile: String, roverFile: String): IO[Unit] = {
+    val output = for {
+      planet <- loadPlanet(planetFile)
+      rover <- loadRover(roverFile)
+      commands <- loadCommands()
+      _ <- runMission(planet, rover, commands)
+    } yield ()
+
+    output.handleErrorWith(it => writeError(it))
+  }
 
   def runMission(planet: Planet, rover: Rover, commands: List[Command]): IO[Unit] =
     executeAll(planet, rover, commands)
@@ -39,23 +47,17 @@ object Version4 {
   def eitherToIO[A](value: Either[ParseError, A]): IO[A] =
     IO.fromEither(value.leftMap(e => new RuntimeException(renderError(e))))
 
-  // TODO 1: load file as pair of strings, parse and then convert Either to IO
-  def loadPlanet(file: String): IO[Planet] = ???
+  def loadPlanet(file: String): IO[Planet] = File.loadTuple(file).map(parsePlanet).flatMap(eitherToIO)
 
-  // TODO 2: load file as pair of strings, parse and then convert Either to IO
-  def loadRover(file: String): IO[Rover] = ???
+  def loadRover(file: String): IO[Rover] = File.loadTuple(file).map(parseRover).flatMap(eitherToIO)
 
-  // TODO 3: ask for commands string, parse and then convert Either to IO
-  def loadCommands(): IO[List[Command]] = ???
+  def loadCommands(): IO[List[Command]] = Console.ask("Insert commands: ").map(parseCommands)
 
-  // TODO 4: log rendered result w/ Info level
-  def writeSequenceCompleted(rover: Rover): IO[Unit] = ???
+  def writeSequenceCompleted(rover: Rover): IO[Unit] = logInfo(renderComplete(rover))
 
-  // TODO 5: log rendered result w/ Info level
-  def writeObstacleDetected(rover: ObstacleDetected): IO[Unit] = ???
+  def writeObstacleDetected(rover: ObstacleDetected): IO[Unit] = logInfo(renderObstacle(rover))
 
-  // TODO 6: log rendered result w/ Error level
-  def writeError(error: Throwable): IO[Unit] = ???
+  def writeError(error: Throwable): IO[Unit] = logError(error.getMessage)
 
   // PARSING
   def parseCommand(input: Char): Command =
